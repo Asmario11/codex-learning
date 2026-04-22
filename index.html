@@ -3,22 +3,134 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hello Asmario</title>
+    <title>Credit Card Tracker</title>
     <style>
       body {
-        margin: 0;
-        min-height: 100vh;
-        display: grid;
-        place-items: center;
         font-family: Arial, sans-serif;
+        margin: 2rem;
+        background: #f7f7f7;
       }
 
       h1 {
-        font-size: 4rem;
+        margin-top: 0;
+      }
+
+      .actions {
+        margin-bottom: 1rem;
+      }
+
+      button {
+        padding: 0.5rem 0.9rem;
+        margin-right: 0.5rem;
+        border: 1px solid #aaa;
+        background: white;
+        cursor: pointer;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 0.6rem;
+        text-align: left;
+      }
+
+      th {
+        background: #efefef;
+      }
+
+      .empty {
+        color: #666;
+        text-align: center;
       }
     </style>
   </head>
   <body>
-    <h1>Hello Asmario</h1>
+    <h1>Credit Card Tracker</h1>
+
+    <div class="actions">
+      <button id="addCardBtn">Add Card</button>
+      <button id="removeCardBtn">Remove Card</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Card Name</th>
+          <th>Limit</th>
+          <th>Balance</th>
+          <th>Payment Due Date</th>
+        </tr>
+      </thead>
+      <tbody id="cardTableBody">
+        <tr id="emptyRow">
+          <td colspan="4" class="empty">No cards added yet.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <script>
+      const addCardBtn = document.getElementById("addCardBtn");
+      const removeCardBtn = document.getElementById("removeCardBtn");
+      const cardTableBody = document.getElementById("cardTableBody");
+
+      function removeEmptyRow() {
+        const emptyRow = document.getElementById("emptyRow");
+        if (emptyRow) {
+          emptyRow.remove();
+        }
+      }
+
+      function addEmptyRowIfNeeded() {
+        if (cardTableBody.children.length === 0) {
+          const row = document.createElement("tr");
+          row.id = "emptyRow";
+          row.innerHTML = '<td colspan="4" class="empty">No cards added yet.</td>';
+          cardTableBody.appendChild(row);
+        }
+      }
+
+      addCardBtn.addEventListener("click", () => {
+        const cardName = prompt("Card Name:");
+        if (!cardName) return;
+
+        const limit = prompt("Limit:");
+        if (!limit) return;
+
+        const balance = prompt("Balance:");
+        if (!balance) return;
+
+        const dueDate = prompt("Payment Due Date (e.g., 2026-05-01):");
+        if (!dueDate) return;
+
+        removeEmptyRow();
+
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${cardName}</td>
+          <td>${limit}</td>
+          <td>${balance}</td>
+          <td>${dueDate}</td>
+        `;
+        cardTableBody.appendChild(row);
+      });
+
+      removeCardBtn.addEventListener("click", () => {
+        const rows = cardTableBody.querySelectorAll("tr");
+
+        if (rows.length === 0 || (rows.length === 1 && rows[0].id === "emptyRow")) {
+          return;
+        }
+
+        const lastRow = rows[rows.length - 1];
+        lastRow.remove();
+        addEmptyRowIfNeeded();
+      });
+    </script>
   </body>
 </html>
