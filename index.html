@@ -85,6 +85,7 @@
       const addCardBtn = document.getElementById("addCardBtn");
       const removeCardBtn = document.getElementById("removeCardBtn");
       const cardTableBody = document.getElementById("cardTableBody");
+      const STORAGE_KEY = "creditCardTracker.cards";
 
       function removeEmptyRow() {
         const emptyRow = document.getElementById("emptyRow");
@@ -125,27 +126,75 @@
         return cell;
       }
 
-      addCardBtn.addEventListener("click", () => {
+      function saveCardsToLocalStorage() {
+        const rows = cardTableBody.querySelectorAll("tr:not(#emptyRow)");
+        const cards = Array.from(rows).map((row) => {
+          const inputs = row.querySelectorAll("input");
+          return {
+            cardName: inputs[0]?.value ?? "",
+            limit: inputs[1]?.value ?? "",
+            balance: inputs[2]?.value ?? "",
+            paymentDueDate: inputs[3]?.value ?? "",
+          };
+        });
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cards));
+      }
+
+      function addCardRow(card = {}) {
         removeEmptyRow();
 
         const row = document.createElement("tr");
-        row.appendChild(createInputCell("text", { placeholder: "Card Name" }));
-        row.appendChild(
-          createInputCell("number", {
-            placeholder: "Limit",
-            min: "0",
-            step: "0.01",
-          }),
-        );
-        row.appendChild(
-          createInputCell("number", {
-            placeholder: "Balance",
-            min: "0",
-            step: "0.01",
-          }),
-        );
-        row.appendChild(createInputCell("date"));
+        const cardNameCell = createInputCell("text", { placeholder: "Card Name" });
+        const limitCell = createInputCell("number", {
+          placeholder: "Limit",
+          min: "0",
+          step: "0.01",
+        });
+        const balanceCell = createInputCell("number", {
+          placeholder: "Balance",
+          min: "0",
+          step: "0.01",
+        });
+        const paymentDueDateCell = createInputCell("date");
+
+        cardNameCell.querySelector("input").value = card.cardName ?? "";
+        limitCell.querySelector("input").value = card.limit ?? "";
+        balanceCell.querySelector("input").value = card.balance ?? "";
+        paymentDueDateCell.querySelector("input").value = card.paymentDueDate ?? "";
+
+        row.appendChild(cardNameCell);
+        row.appendChild(limitCell);
+        row.appendChild(balanceCell);
+        row.appendChild(paymentDueDateCell);
         cardTableBody.appendChild(row);
+      }
+
+      function loadCardsFromLocalStorage() {
+        const savedCardsJson = localStorage.getItem(STORAGE_KEY);
+
+        if (!savedCardsJson) {
+          return;
+        }
+
+        let savedCards;
+
+        try {
+          savedCards = JSON.parse(savedCardsJson);
+        } catch {
+          return;
+        }
+
+        if (!Array.isArray(savedCards) || savedCards.length === 0) {
+          return;
+        }
+
+        savedCards.forEach((card) => addCardRow(card));
+      }
+
+      addCardBtn.addEventListener("click", () => {
+        addCardRow();
+        saveCardsToLocalStorage();
       });
 
       removeCardBtn.addEventListener("click", () => {
@@ -158,7 +207,16 @@
         const lastRow = rows[rows.length - 1];
         lastRow.remove();
         addEmptyRowIfNeeded();
+        saveCardsToLocalStorage();
       });
+
+      cardTableBody.addEventListener("input", (event) => {
+        if (event.target.matches("input")) {
+          saveCardsToLocalStorage();
+        }
+      });
+
+      loadCardsFromLocalStorage();
     </script>
   </body>
 </html>
