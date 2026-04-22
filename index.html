@@ -102,16 +102,49 @@
         }
       }
 
+      function createInputCell(inputType, options = {}) {
+        const cell = document.createElement("td");
+        const input = document.createElement("input");
+
+        input.className = "cell-input";
+        input.type = inputType;
+
+        if (options.placeholder) {
+          input.placeholder = options.placeholder;
+        }
+
+        if (options.min !== undefined) {
+          input.min = options.min;
+        }
+
+        if (options.step !== undefined) {
+          input.step = options.step;
+        }
+
+        cell.appendChild(input);
+        return cell;
+      }
+
       addCardBtn.addEventListener("click", () => {
         removeEmptyRow();
 
         const row = document.createElement("tr");
-        row.innerHTML = `
-          <td><input class="cell-input" type="text" placeholder="Card Name" /></td>
-          <td><input class="cell-input" type="number" min="0" step="0.01" placeholder="Limit" /></td>
-          <td><input class="cell-input" type="number" min="0" step="0.01" placeholder="Balance" /></td>
-          <td><input class="cell-input" type="date" /></td>
-        `;
+        row.appendChild(createInputCell("text", { placeholder: "Card Name" }));
+        row.appendChild(
+          createInputCell("number", {
+            placeholder: "Limit",
+            min: "0",
+            step: "0.01",
+          }),
+        );
+        row.appendChild(
+          createInputCell("number", {
+            placeholder: "Balance",
+            min: "0",
+            step: "0.01",
+          }),
+        );
+        row.appendChild(createInputCell("date"));
         cardTableBody.appendChild(row);
       });
 
