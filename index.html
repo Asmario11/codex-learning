@@ -48,6 +48,13 @@
         color: #666;
         text-align: center;
       }
+
+      .cell-input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #bbb;
+        padding: 0.35rem 0.45rem;
+      }
     </style>
   </head>
   <body>
@@ -96,26 +103,14 @@
       }
 
       addCardBtn.addEventListener("click", () => {
-        const cardName = prompt("Card Name:");
-        if (!cardName) return;
-
-        const limit = prompt("Limit:");
-        if (!limit) return;
-
-        const balance = prompt("Balance:");
-        if (!balance) return;
-
-        const dueDate = prompt("Payment Due Date (e.g., 2026-05-01):");
-        if (!dueDate) return;
-
         removeEmptyRow();
 
         const row = document.createElement("tr");
         row.innerHTML = `
-          <td>${cardName}</td>
-          <td>${limit}</td>
-          <td>${balance}</td>
-          <td>${dueDate}</td>
+          <td><input class="cell-input" type="text" placeholder="Card Name" /></td>
+          <td><input class="cell-input" type="number" min="0" step="0.01" placeholder="Limit" /></td>
+          <td><input class="cell-input" type="number" min="0" step="0.01" placeholder="Balance" /></td>
+          <td><input class="cell-input" type="date" /></td>
         `;
         cardTableBody.appendChild(row);
       });
