@@ -204,10 +204,19 @@
         try {
           savedCards = JSON.parse(savedCardsJson);
         } catch {
+          localStorage.removeItem(STORAGE_KEY);
           return;
         }
 
-        if (!Array.isArray(savedCards) || savedCards.length === 0) {
+        if (!Array.isArray(savedCards)) {
+          localStorage.removeItem(STORAGE_KEY);
+          return;
+        }
+
+        cardTableBody.innerHTML = "";
+
+        if (savedCards.length === 0) {
+          addEmptyRowIfNeeded();
           return;
         }
 
