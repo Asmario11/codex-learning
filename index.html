@@ -40,6 +40,11 @@
         text-align: left;
       }
 
+      .checkbox-cell {
+        width: 1%;
+        text-align: center;
+      }
+
       th {
         background: #efefef;
       }
@@ -68,6 +73,7 @@
     <table>
       <thead>
         <tr>
+          <th class="checkbox-cell">Select</th>
           <th>Card Name</th>
           <th>Limit</th>
           <th>Balance</th>
@@ -76,7 +82,7 @@
       </thead>
       <tbody id="cardTableBody">
         <tr id="emptyRow">
-          <td colspan="4" class="empty">No cards added yet.</td>
+          <td colspan="5" class="empty">No cards added yet.</td>
         </tr>
       </tbody>
     </table>
@@ -98,7 +104,7 @@
         if (cardTableBody.children.length === 0) {
           const row = document.createElement("tr");
           row.id = "emptyRow";
-          row.innerHTML = '<td colspan="4" class="empty">No cards added yet.</td>';
+          row.innerHTML = '<td colspan="5" class="empty">No cards added yet.</td>';
           cardTableBody.appendChild(row);
         }
       }
@@ -122,6 +128,10 @@
           input.step = options.step;
         }
 
+        if (options.field) {
+          input.dataset.field = options.field;
+        }
+
         cell.appendChild(input);
         return cell;
       }
@@ -129,12 +139,11 @@
       function saveCardsToLocalStorage() {
         const rows = cardTableBody.querySelectorAll("tr:not(#emptyRow)");
         const cards = Array.from(rows).map((row) => {
-          const inputs = row.querySelectorAll("input");
           return {
-            cardName: inputs[0]?.value ?? "",
-            limit: inputs[1]?.value ?? "",
-            balance: inputs[2]?.value ?? "",
-            paymentDueDate: inputs[3]?.value ?? "",
+            cardName: row.querySelector('input[data-field="cardName"]')?.value ?? "",
+            limit: row.querySelector('input[data-field="limit"]')?.value ?? "",
+            balance: row.querySelector('input[data-field="balance"]')?.value ?? "",
+            paymentDueDate: row.querySelector('input[data-field="paymentDueDate"]')?.value ?? "",
           };
         });
 
@@ -145,24 +154,37 @@
         removeEmptyRow();
 
         const row = document.createElement("tr");
-        const cardNameCell = createInputCell("text", { placeholder: "Card Name" });
+        const selectCell = document.createElement("td");
+        const selectCheckbox = document.createElement("input");
+        selectCell.className = "checkbox-cell";
+        selectCheckbox.type = "checkbox";
+        selectCheckbox.setAttribute("aria-label", "Select row");
+        selectCell.appendChild(selectCheckbox);
+
+        const cardNameCell = createInputCell("text", {
+          placeholder: "Card Name",
+          field: "cardName",
+        });
         const limitCell = createInputCell("number", {
           placeholder: "Limit",
           min: "0",
           step: "0.01",
+          field: "limit",
         });
         const balanceCell = createInputCell("number", {
           placeholder: "Balance",
           min: "0",
           step: "0.01",
+          field: "balance",
         });
-        const paymentDueDateCell = createInputCell("date");
+        const paymentDueDateCell = createInputCell("date", { field: "paymentDueDate" });
 
         cardNameCell.querySelector("input").value = card.cardName ?? "";
         limitCell.querySelector("input").value = card.limit ?? "";
         balanceCell.querySelector("input").value = card.balance ?? "";
         paymentDueDateCell.querySelector("input").value = card.paymentDueDate ?? "";
 
+        row.appendChild(selectCell);
         row.appendChild(cardNameCell);
         row.appendChild(limitCell);
         row.appendChild(balanceCell);
@@ -198,14 +220,22 @@
       });
 
       removeCardBtn.addEventListener("click", () => {
-        const rows = cardTableBody.querySelectorAll("tr");
+        const rows = cardTableBody.querySelectorAll("tr:not(#emptyRow)");
 
-        if (rows.length === 0 || (rows.length === 1 && rows[0].id === "emptyRow")) {
+        if (rows.length === 0) {
           return;
         }
 
-        const lastRow = rows[rows.length - 1];
-        lastRow.remove();
+        const selectedRows = Array.from(rows).filter((row) => {
+          const checkbox = row.querySelector('input[type="checkbox"]');
+          return checkbox?.checked;
+        });
+
+        if (selectedRows.length === 0) {
+          return;
+        }
+
+        selectedRows.forEach((row) => row.remove());
         addEmptyRowIfNeeded();
         saveCardsToLocalStorage();
       });
